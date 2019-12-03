@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
+const moviedex = require('./moviedex.json');
 
 const app = express();
 
@@ -17,6 +18,46 @@ app.use(function validateBearerToken(req, res, next) {
   }
   next();
 });
+
+
+const validTypes = [
+  'genre',
+  'country',
+  'avg_vote',
+];
+
+app.get('/movies', sortBy); 
+
+function sortBy(req, res) {
+  const { genre , country , avg_vote} = req.query;
+  if (genre) {
+    sortByGenre(res, genre);
+  }else if (country) {
+    sortByCountry();
+  } else if (avg_vote) {
+    sortByAvgVote();
+  }else {
+    res.json(moviedex);
+  }
+}
+
+
+function sortByGenre(res, genre){
+  
+  let filteredList = moviedex.filter(movie =>
+  movie.genre.toLowerCase() === genre.toLowerCase());
+  res.json(filteredList);
+}
+function sortByCountry(){
+  console.log('sort by country')
+}
+function sortByAvgVote(){
+  console.log('sort by avgvote')
+}
+
+
+
+const PORT = 8080;
 
 app.listen(PORT, () => {
   console.log(`Server listening at http://localhost:${PORT}`);
