@@ -1,9 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
+const helmet = require('helmet');
 const moviedex = require('./moviedex.json');
 
 const app = express();
+
+app.use(cors());
+app.use(helmet());
 
 app.use(morgan('dev'));
 
@@ -26,33 +31,36 @@ const validTypes = [
   'avg_vote',
 ];
 
-app.get('/movies', sortBy); 
+app.get('/movies', sortBy);
 
 function sortBy(req, res) {
-  const { genre , country , avg_vote} = req.query;
+  const { genre, country, avg_vote } = req.query;
   if (genre) {
     sortByGenre(res, genre);
-  }else if (country) {
-    sortByCountry();
+  } else if (country) {
+    sortByCountry(res, country);
   } else if (avg_vote) {
-    sortByAvgVote();
-  }else {
+    sortByAvgVote(res, avg_vote);
+  } else {
     res.json(moviedex);
   }
 }
 
 
-function sortByGenre(res, genre){
-  
+function sortByGenre(res, genre) {
   let filteredList = moviedex.filter(movie =>
-  movie.genre.toLowerCase() === genre.toLowerCase());
+    movie.genre.toLowerCase().includes(genre.toLowerCase()));
   res.json(filteredList);
 }
-function sortByCountry(){
-  console.log('sort by country')
+function sortByCountry(res, country) {
+  let filteredList = moviedex.filter(movie =>
+    movie.country.toLowerCase().includes(country.toLowerCase()));
+  res.json(filteredList);
 }
-function sortByAvgVote(){
-  console.log('sort by avgvote')
+function sortByAvgVote(res, avg_vote) {
+  let filteredList = moviedex.filter(movie =>
+    Number(movie.avg_vote) >= Number(avg_vote));
+  res.json(filteredList);
 }
 
 
